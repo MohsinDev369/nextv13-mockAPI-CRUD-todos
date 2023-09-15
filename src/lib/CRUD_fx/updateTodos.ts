@@ -4,7 +4,7 @@ export default async function updateTodos(id: string, value: string) {
         headers: { 'content-type': 'application/json' },
         // Send your data in the request body as JSON
         body: JSON.stringify({
-            "Todo": value,
+            "Todo": value
         })
     }).then(res => {
         if (res.ok) {
