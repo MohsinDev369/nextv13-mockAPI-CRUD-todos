@@ -1,0 +1,1 @@
+export type Todos = { Todo: string; IsDon: boolean; id: string };
