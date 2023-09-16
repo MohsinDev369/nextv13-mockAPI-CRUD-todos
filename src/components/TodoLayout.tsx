@@ -155,7 +155,7 @@ export default function TodoLayout() {
   }
   function handleUpdate(id: string, value: string) {
     console.log(id);
-    updateTodos(id, value).then(() => {setValue("");});
+    updateTodos(id, value).then((res) => {setValue(""); setRunEffect(true);});
   }
   function DialogDemo({ todo }: { todo: any }) {
     return (
