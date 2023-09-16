@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,10 +36,30 @@ export const dynamic = "force-dynamic";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import updateTodos from "@/lib/CRUD_fx/updateTodos";
 
-export default function TodoLayout({ Data }: { Data: Todos[] }) {
-  const router = useRouter();
+export default function TodoLayout() {
+  // { Data }: { Data: Todos[] }
+  let [Data, setData] = useState<Todos[]>([]);
   let [value, setValue] = useState("");
   let [updateValue, setUpdateValue] = useState("");
+  const [runEffect, setRunEffect] = useState(true);
+  // const [newid, setNewId] = useState<any>();
+  let router = useRouter()
+  // console.log(Data[Data.length - 1]?.id)
+  useEffect(() => {
+    async function getTodos() {
+      if (runEffect) {
+        let res = await fetch(
+          `https://${process.env.NEXT_PUBLIC_API_ENDPOINT}.mockapi.io/api/Todos`
+        );
+        let Data = await res.json();
+        setData(Data);
+        // Reset the flag after running the effect
+        setRunEffect(false);
+      }
+    }
+    getTodos();
+  }, [runEffect]);
+  // const router = useRouter();
   return (
     <Card>
       <CardHeader>
@@ -49,6 +69,7 @@ export default function TodoLayout({ Data }: { Data: Todos[] }) {
       <CardContent>
         <div className="flex space-x-2">
           <Input
+            id="InitialValue"
             type="text"
             placeholder="Do Home Work..."
             value={value}
@@ -108,16 +129,33 @@ export default function TodoLayout({ Data }: { Data: Todos[] }) {
 
   function handleAddTodo() {
     console.log(value);
-    Addfx(value).then(() => router.refresh());
-    setValue("");
+    console.log(Data);
+    // console.log(newid);
+    // setNewId(Data[Data.length - 1]?.id);
+    if (value != "") {
+      Addfx(value).then((res) => {
+        setValue(""); setData((prevData) => [
+          ...prevData,
+          res,
+        ]); console.log("handleAddTodo: " + JSON.stringify(res));});
+      // setData((prevData) => [
+      //   ...prevData,
+      //   { Todo: value, IsDon: false, id: newid },
+      // ])
+      console.log(Data);
+      // console.log(newid);
+      
+      // setValue("");
+    } else {
+      console.log("No value");
+    }
   }
   function handleDelTodo(id: string) {
-    delTodos(id).then(() => router.refresh());
+    delTodos(id).then(() => { setValue(""); setRunEffect(true);});
   }
   function handleUpdate(id: string, value: string) {
-    
     console.log(id);
-    updateTodos(id, value).then(() => router.refresh());
+    updateTodos(id, value).then(() => {setValue("");});
   }
   function DialogDemo({ todo }: { todo: any }) {
     return (
@@ -140,7 +178,7 @@ export default function TodoLayout({ Data }: { Data: Todos[] }) {
                 New Todo
               </Label>
               <Input
-                id="name"
+                id="updatedTodos"
                 onChange={(e) => (updateValue = e.target.value)}
                 className="col-span-3"
               />
